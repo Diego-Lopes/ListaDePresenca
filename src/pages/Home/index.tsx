@@ -1,13 +1,22 @@
 
-import React, { useEffect, useState } from 'react';
-import { Card } from '../../components/Card';
+import { useEffect, useState } from 'react';
+import { Card, CardProps } from '../../components/Card';
 import './styles.css';
 
+type ProfileResponse = {
+  name: string;
+  avatar_url: string;
+}
+
+type User = {
+  name: string;
+  avatar: string;
+}
 
 export function Home() {
-  const [studentName, setStudentName] = useState();
-  const [students, setStudents] = useState([]);
-  const [user, setUser] = useState({ name: '', avatar: '' })
+  const [studentName, setStudentName] = useState<string>("");
+  const [students, setStudents] = useState<CardProps[]>([]);
+  const [user, setUser] = useState<User>({} as User)
 
 
   function handleAddStudent() {
@@ -21,13 +30,25 @@ export function Home() {
     }
 
     setStudents(prevState => [...prevState, newStudent]);
+
+    setStudentName("");
   }
 
 
   useEffect(() => {
-    fetch('https://api.github.com/users/diego-lopes')
-      .then(response => response.json())
-      .then(data => setUser({ name: data.name, avatar: data.avatar_url }))
+    async function featchData() {
+      const response = await fetch('https://api.github.com/users/diego-lopes');
+      const data = await response.json() as ProfileResponse;
+
+      setUser({
+        name: data.name,
+        avatar: data.avatar_url
+      })
+
+    }
+
+    featchData();
+
   }, [])
   return (
     <div className="container">
@@ -41,6 +62,7 @@ export function Home() {
       <input
         type="text"
         placeholder="Digite o nome..."
+        value={studentName}
         onChange={e => setStudentName(e.target.value)}
       />
       <button type="button" onClick={handleAddStudent}>Adicionar</button>
